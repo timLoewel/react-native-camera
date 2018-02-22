@@ -375,47 +375,48 @@ public class RCTCamera {
         if (null == camera) {
             return;
         }
-
-        CameraInfoWrapper cameraInfo = _cameraInfos.get(type);
-        int displayRotation;
-        int rotation;
-        int orientation = cameraInfo.info.orientation;
-        if (cameraInfo.info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-            rotation = (orientation + _actualDeviceOrientation * 90) % 360;
-            displayRotation = (720 - orientation - _actualDeviceOrientation * 90) % 360;
-        } else {
-            rotation = (orientation - _actualDeviceOrientation * 90 + 360) % 360;
-            displayRotation = rotation;
-        }
-        cameraInfo.rotation = rotation;
-        // TODO: take in account the _orientation prop
-
-        setAdjustedDeviceOrientation(rotation);
-        camera.setDisplayOrientation(displayRotation);
-
-        Camera.Parameters parameters = camera.getParameters();
-        parameters.setRotation(cameraInfo.rotation);
-
-        // set preview size
-        // defaults to highest resolution available
-        Camera.Size optimalPreviewSize = getBestSize(parameters.getSupportedPreviewSizes(), Integer.MAX_VALUE, Integer.MAX_VALUE);
-        int width = optimalPreviewSize.width;
-        int height = optimalPreviewSize.height;
-
-        parameters.setPreviewSize(width, height);
         try {
+            CameraInfoWrapper cameraInfo = _cameraInfos.get(type);
+            int displayRotation;
+            int rotation;
+            int orientation = cameraInfo.info.orientation;
+            if (cameraInfo.info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+                rotation = (orientation + _actualDeviceOrientation * 90) % 360;
+                displayRotation = (720 - orientation - _actualDeviceOrientation * 90) % 360;
+            } else {
+                rotation = (orientation - _actualDeviceOrientation * 90 + 360) % 360;
+                displayRotation = rotation;
+            }
+            cameraInfo.rotation = rotation;
+            // TODO: take in account the _orientation prop
+
+            setAdjustedDeviceOrientation(rotation);
+            camera.setDisplayOrientation(displayRotation);
+
+            Camera.Parameters parameters = camera.getParameters();
+            parameters.setRotation(cameraInfo.rotation);
+
+            // set preview size
+            // defaults to highest resolution available
+            Camera.Size optimalPreviewSize = getBestSize(parameters.getSupportedPreviewSizes(), Integer.MAX_VALUE, Integer.MAX_VALUE);
+            int width = optimalPreviewSize.width;
+            int height = optimalPreviewSize.height;
+
+            parameters.setPreviewSize(width, height);
+
             camera.setParameters(parameters);
+            if (cameraInfo.rotation == 0 || cameraInfo.rotation == 180) {
+                cameraInfo.previewWidth = width;
+                cameraInfo.previewHeight = height;
+            } else {
+                cameraInfo.previewWidth = height;
+                cameraInfo.previewHeight = width;
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        if (cameraInfo.rotation == 0 || cameraInfo.rotation == 180) {
-            cameraInfo.previewWidth = width;
-            cameraInfo.previewHeight = height;
-        } else {
-            cameraInfo.previewWidth = height;
-            cameraInfo.previewHeight = width;
-        }
+
     }
 
     private RCTCamera(int deviceOrientation) {
