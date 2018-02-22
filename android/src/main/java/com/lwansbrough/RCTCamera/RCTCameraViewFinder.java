@@ -380,11 +380,10 @@ class RCTCameraViewFinder extends TextureView implements TextureView.SurfaceText
                     handleFocus(event, params);
                 }
             }
-        } catch (RuntimeException exception) {
+        } catch (RuntimeException e) {
             // TODO do a real log.
             // this is a hotfix for https://sentry.io/obob/obobapp/issues/470683464/
             e.printStackTrace();
-
         }
 
         return true;
